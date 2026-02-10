@@ -1,0 +1,14 @@
+NOTICE
+======
+
+Linly-Talker-Stream: https://github.com/Kedreamix/Linly-Talker-Stream
+Copyright (c) Kedreamix
+
+This product includes software developed by:
+
+- LiveTalking: https://github.com/lipku/LiveTalking
+
+This repository also references and/or integrates third-party projects and models
+such as Wav2Lip, MuseTalk, ER-NeRF, Whisper, FunASR, edge-tts, etc. Please review
+and comply with their respective licenses when using or redistributing.
+

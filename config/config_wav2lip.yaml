@@ -1,0 +1,49 @@
+# 开发环境配置
+app:
+  listenport: 8010
+  max_session: 1
+  
+  ssl: true
+  ssl_cert: ssl_certs/localhost.crt
+  ssl_key: ssl_certs/localhost.key
+  
+  # 前端开发服务器配置
+  web:
+    port: 3000
+    host: 0.0.0.0  # 0.0.0.0 允许外部访问，localhost 仅本地
+
+
+model:
+  type: wav2lip 
+  avatar_id: wav2lip_avatar1
+  batch_size: 8  # 开发环境减小 batch size
+  model_path: ./models
+
+tts:
+  type: edgetts  # 开发环境使用免费的 EdgeTTS
+  ref_file: zh-CN-YunxiaNeural
+
+asr:
+  mode: browser  # browser | server | auto
+  type: whisper  # whisper | funasr
+  model_size: base  # tiny | base | small | medium | large
+  language: zh  # zh | en | auto
+  device: auto  # auto | cpu | cuda
+
+llm:
+  api_key: ${DASHSCOPE_API_KEY}
+  base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+  model: qwen-plus
+
+audio:
+  fps: 50
+  sample_rate: 16000
+
+video:
+  width: 450
+  
+  height: 450
+  fps: 25
+
+custom_video:
+  config_path: ''

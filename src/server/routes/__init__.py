@@ -1,0 +1,19 @@
+"""路由模块"""
+from .webrtc import offer
+from .chat import human, interrupt_talk, is_speaking
+from .audio import humanaudio, asr
+from .video import set_audiotype, record, download_record
+from .health import health_check
+
+__all__ = [
+    'offer',
+    'human',
+    'interrupt_talk', 
+    'is_speaking',
+    'humanaudio',
+    'asr',
+    'set_audiotype',
+    'record',
+    'download_record',
+    'health_check',
+]

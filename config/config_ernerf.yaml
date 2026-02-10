@@ -1,0 +1,37 @@
+# ERNeRF 模型配置文件
+# 说明：未列出的配置项将使用 schema.py 中定义的默认值
+
+app:
+  listenport: 8010
+  max_session: 1
+  # HTTPS 配置 - 支持浏览器录音功能
+  ssl_cert: ssl_certs/localhost.crt
+  ssl_key: ssl_certs/localhost.key
+
+model:
+  type: ernerf  # wav2lip | musetalk | ultralight | ernerf
+  avatar_id: ernerf_obama
+  # ERNeRF 专属配置
+  ernerf:
+    # ===== 必填：数据路径 =====
+    pose: ./data/avatars/ernerf_obama/data_kf.json
+    au: ./data/avatars/ernerf_obama/au.csv
+    workspace: ./data/avatars/ernerf_obama/
+    ckpt: ./data/avatars/ernerf_obama/ngp_kf.pth
+    # more config please refer to src/config/schema.py
+
+tts:
+  type: edgetts  # edgetts | azuretts | fishtts | gpt-sovits | cosyvoice | tencent | doubao | indextts2 | xtts
+  ref_file: zh-CN-YunxiaNeural
+
+asr:
+  mode: browser  # browser | server | auto
+  type: whisper  # whisper | funasr
+  model_size: base  # tiny | base | small | medium | large
+  language: zh  # zh | en | auto
+  device: auto  # auto | cpu | cuda
+
+llm:
+  api_key: ${DASHSCOPE_API_KEY}
+  base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+  model: qwen-plus

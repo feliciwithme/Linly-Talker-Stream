@@ -1,0 +1,144 @@
+// English language pack
+export default {
+  header: {
+    title: 'Linly-Talker-Stream',
+    subtitle: 'Real-time Interactive Digital Human',
+    status: {
+      connected: 'Connected',
+      connecting: 'Connecting...',
+      disconnected: 'Disconnected'
+    },
+    session: 'Session',
+    github: 'GitHub'
+  },
+  
+  chat: {
+    title: 'Chat Interaction',
+    chatMode: 'Chat Mode',
+    ttsMode: 'TTS Mode',
+    inputPlaceholder: 'Type a message, press Enter to send...',
+    inputPlaceholderDisconnected: 'Please connect first...',
+    sendButton: 'Send',
+    voiceButton: 'Hold to Talk',
+    voiceButtonContinuous: 'Continuous',
+    voiceButtonRecording: 'Release to Send',
+    voiceButtonRecordingContinuous: 'Recognizing...',
+    ttsInputPlaceholder: 'Enter text for the digital human to read aloud...',
+    ttsButton: 'Start Reading',
+    ttsTitle: 'Input Text to Read',
+    welcomeMessage: 'Hello! I\'m Linly, a digital human. Nice to meet you. Click "Start Connection" on the right to begin our conversation!',
+    you: 'You',
+    ai: 'Linly'
+  },
+  
+  video: {
+    title: 'Digital Human Video',
+    connect: 'Start Connection',
+    disconnect: 'Disconnect',
+    startRecord: 'Start Recording',
+    stopRecord: 'Stop Recording',
+    download: 'Download Recording',
+    recording: 'Recording',
+    overlayTextReady: 'Click "Start Connection" to begin',
+    overlayTextLoading: 'Backend is starting, please wait...',
+    backendStarting: 'Backend Starting...'
+  },
+  
+  settings: {
+    title: 'Settings',
+    systemSettings: 'System Settings',
+    save: 'Save Settings',
+    resetDefault: 'Reset to Default',
+    cancel: 'Cancel',
+    confirm: 'OK',
+    confirmTitle: 'Confirm',
+    confirmMessage: 'Are you sure you want to reset to default settings? This will clear all custom configurations.',
+    
+    webrtc: {
+      title: 'WebRTC Connection',
+      useStun: 'Use STUN Server',
+      useStunDesc: 'Enable STUN for better NAT traversal',
+      stunServer: 'STUN Server Address',
+      googleStun: 'Google STUN (Recommended)',
+      xiaomiStun: 'Xiaomi STUN',
+      tencentStun: 'Tencent STUN',
+      customStun: 'Custom...',
+      customStunAddress: 'Custom STUN Address'
+    },
+    
+    recording: {
+      title: 'Recording',
+      autoRecord: 'Auto Recording',
+      autoRecordDesc: 'Start recording automatically after connection',
+      format: 'Recording Format'
+    },
+    
+    display: {
+      title: 'Interface',
+      showDebug: 'Show Debug Panel',
+      showDebugDesc: 'Display connection status and technical info',
+      showTimestamp: 'Message Timestamp',
+      showTimestampDesc: 'Show message time in chat',
+      theme: 'Theme',
+      themeDark: 'Dark Mode (Default)',
+      themeLight: 'Light Mode',
+      themeAuto: 'Follow System',
+      language: 'Interface Language',
+      videoSize: 'Video Size',
+      videoSizeDesc: 'Adjust the display size of digital human video'
+    },
+    
+    voice: {
+      title: 'Voice Recognition',
+      currentMode: 'Current Mode: Browser Speech Recognition (Web Speech API)',
+      currentModeDesc: 'Using browser built-in speech recognition, no need to send audio to server, faster real-time recognition.',
+      currentModeNote: '⚠️ Only supports Chrome/Edge browser, requires internet connection.',
+      continuous: 'Continuous Recognition',
+      continuousDesc: 'Continuously listen for voice input',
+      language: 'Recognition Language',
+      langZhCN: 'Chinese (Simplified)',
+      langEnUS: 'English (US)',
+      langJaJP: 'Japanese',
+      langKoKR: 'Korean'
+    }
+  },
+  
+  notifications: {
+    settingsSaved: 'Settings saved',
+    settingsReset: 'Reset to default settings',
+    backendReady: 'Backend is ready, you can start connecting',
+    backendTimeout: 'Backend startup timeout, please check service status',
+    connectSuccess: 'Connected successfully! You can now start chatting with me.',
+    connectFailed: 'Connection failed, please try again later',
+    connectTimeout: 'Connection timeout, please check if backend service is running',
+    disconnected: 'Connection closed',
+    recordStart: 'Recording started',
+    recordStartFailed: 'Recording failed',
+    recordStop: 'Recording saved, click download button to get the video',
+    recordStopSimple: 'Recording saved',
+    recordStopFailed: 'Failed to stop recording',
+    noRecordFile: 'No recording file available',
+    downloading: 'Starting download...',
+    messageFailed: 'Failed to send message, please try again',
+    ttsFailed: 'Failed to send TTS request',
+    micPermission: 'Cannot access microphone, please check browser permissions',
+    voiceRecognizing: 'Recognizing voice...',
+    voiceRecognized: 'Voice recognition completed',
+    voiceNoContent: 'No voice content recognized',
+    voiceFailed: 'Voice recognition failed',
+    voiceRequestFailed: 'Voice recognition request failed',
+    voiceMessageFailed: 'Failed to send voice message, please try again',
+    connectFirst: 'Please connect first',
+    backendNotReady: 'Backend is not fully started, please wait...'
+  },
+  
+  tooltips: {
+    connectDisabled: 'Backend is starting, please wait...',
+    recordDisabled: 'Please connect first before recording',
+    downloadDisabled: 'No recording file available',
+    voiceDisabled: 'Please connect first',
+    voiceContinuous: 'Click to start continuous recognition',
+    voiceRecording: 'Click to stop',
+    voiceHold: 'Hold to talk'
+  }
+}

@@ -1,0 +1,61 @@
+# TalkingGaussian 配置文件
+app:
+  # 后端服务配置
+  listenport: 8010
+  listenhost: 0.0.0.0  # 0.0.0.0 允许外部访问，127.0.0.1 仅本地
+  max_session: 1
+  
+  # SSL/HTTPS 统一配置（一处控制，前后端自动适配）
+  # ssl: true  启用 HTTPS，支持远程录音
+  # ssl: false 使用 HTTP，仅本地开发
+  ssl: true
+  ssl_cert: ssl_certs/localhost.crt
+  ssl_key: ssl_certs/localhost.key
+  
+  # 前端开发服务器配置
+  web:
+    port: 3000
+    host: 0.0.0.0  # 0.0.0.0 允许外部访问，localhost 仅本地
+
+
+model:
+  type: talkinggaussian
+  avatar_id: talkinggaussian_obama
+
+  # TalkingGaussian
+  talkinggaussian:
+    source_path: data/avatars/talkinggaussian_obama/source
+    model_path: data/avatars/talkinggaussian_obama/model
+    bg_img: "white" # 背景配置: white(白色) | black(黑色) | /path/to/bg.jpg(完整路径)
+
+tts:
+  type: edgetts  # edgetts | azuretts | fishtts | gpt-sovits | cosyvoice | tencent | doubao | indextts2 | xtts
+  ref_file: zh-CN-YunxiaNeural
+
+asr:
+  mode: browser  # browser | server | auto
+  type: whisper  # whisper | funasr
+  model_size: base  # tiny | base | small | medium | large
+  language: zh  # zh | en | auto
+  device: auto  # auto | cpu | cuda
+
+llm:
+  api_key: ${DASHSCOPE_API_KEY}  # 支持环境变量引用
+  base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+  model: qwen-plus
+
+audio:
+  fps: 50
+  sample_rate: 16000
+  # 音频窗口配置
+  l: 10  # left
+  m: 8   # middle  
+  r: 10  # right
+
+video:
+  width: 450
+  height: 450
+  fps: 25
+
+custom_video:
+  config_path: ''

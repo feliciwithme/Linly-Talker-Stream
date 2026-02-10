@@ -1,0 +1,53 @@
+[project]
+name = "linly-talker-stream"
+version = "0.1.0"
+description = "Linly-Talker-Stream: 实时流式数字人对话系统 - 模块化多 Avatar 支持，基于 WebRTC 的全双工交互"
+readme = "README.md"
+requires-python = ">=3.10, <3.12"
+license = { text = "Apache-2.0" }
+authors = [
+    { name = "Kedreamix", email = "kedreamix@gmail.com" }
+]
+
+dependencies = [
+    "aiohttp",
+    "aiohttp-cors",
+    "aiortc",
+    "av",
+    "edge-tts",
+    "librosa",
+    "omegaconf",
+    "openai",
+    "numpy<2",
+    "opencv-python-headless<4.12",
+    "pydantic",
+    "PyYAML",
+    "scipy",
+    "soundfile==0.12.1",
+    "torch==2.5.0",
+    "torchvision",
+    "torchaudio",
+    "tqdm",
+    "typing-extensions",
+    "websockets==12.0",
+    "resampy",
+    "azure-cognitiveservices-speech",
+    "logger",
+    "transformers==4.46.0",
+]
+
+[tool.uv.sources]
+torch = [
+    { index = "pytorch-cu124" },
+]
+torchvision = [
+    { index = "pytorch-cu124" },
+]
+torchaudio = [
+    { index = "pytorch-cu124" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cu124"
+url = "https://download.pytorch.org/whl/cu124"
+explicit = true

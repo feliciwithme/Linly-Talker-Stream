@@ -1,0 +1,30 @@
+[project]
+name = "linly-talker-stream-wav2lip"
+version = "0.1.0"
+description = "Linly-Talker-Stream with Wav2Lip engine (2D)"
+requires-python = ">=3.10, <3.12"
+license = "Apache-2.0"
+authors = [
+    { name = "Kedreamix", email = "kedreamix@gmail.com" }
+]
+
+dependencies = [
+    # Wav2Lip 专用依赖
+    "imageio>=2.31.0",
+    "av>=10.0.0",
+    "torch==2.5.0",
+    "torchvision",
+    "torchaudio",
+]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["*"]
+exclude = []
+
+[tool.setuptools.package-data]
+"*" = ["**/*"]

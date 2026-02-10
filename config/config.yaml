@@ -1,0 +1,67 @@
+# 默认配置文件
+app:
+  listenport: 8010
+  max_session: 1
+  
+  # SSL/HTTPS 配置（可选，启用后支持远程录音功能）
+  ssl: true
+  ssl_cert: ssl_certs/localhost.crt 
+  ssl_key: ssl_certs/localhost.key
+
+model:
+  type: musetalk  # wav2lip | musetalk | ultralight | ernerf
+  avatar_id: avator_1
+  batch_size: 16
+  model_path: ./models
+  
+  # ERNeRF 配置信息参考
+  # type: ernerf
+  # ernerf:
+  #   pose: data/data_kf.json
+  #   au: data/au.csv
+  #   torso_imgs: ""
+  #   workspace: data/video
+  #   ckpt: data/pretrained/ngp_kf.pth
+  #   # 更多配置请参考 config_nerf.yaml
+
+  # TalkingGaussian 配置信息参考
+  # type: talkinggaussian
+  # talkinggaussian:
+  #   source_path: data/Obama_test
+  #   model_path: data/output/Obama
+  #   bg_img: "white" # 背景配置: white(白色) | black(黑色) | /path/to/bg.jpg(完整路径)
+  # 更多配置请参考 config_talkinggaussian.yaml
+
+# TTS 配置信息，可以改对应的模型，建议edgetts
+tts:
+  type: edgetts  # edgetts | azuretts | fishtts | gpt-sovits | cosyvoice | tencent | doubao | indextts2 | xtts
+  ref_file: zh-CN-YunxiaNeural
+
+# ASR 配置信息，可以改对应的模型，建议browser
+asr:
+  mode: browser  # browser | server | auto (优先浏览器，不支持时用后端)
+  type: whisper  # whisper | funasr (仅 mode=server 时使用)
+  model_size: base  # tiny | base | small | medium | large
+  language: zh  # zh | en | auto
+  device: auto  # auto | cpu | cuda
+
+# LLM 配置信息，可以改对应的模型
+llm:
+  api_key: ${DASHSCOPE_API_KEY}  # 支持环境变量引用
+  base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+  model: qwen-plus
+
+# Audio 配置信息，不要更改
+audio:
+  fps: 50
+  sample_rate: 16000
+
+# Video配置信息，运用于ERNeRF和TalkingGaussian
+video:
+  width: 450
+  height: 450
+  fps: 25
+
+# CustomVideo配置信息
+custom_video:
+  config_path: ''
