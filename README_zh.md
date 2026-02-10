@@ -82,7 +82,7 @@ Linly-Talker-Stream 的定位是"实时流式版本"，核心会复用并扩展 
 
 **Web 界面示意**
 
-![Linly-Talker Stream](linly_web.png)
+![Linly-Talker Stream](assets/linly_web.png)
 
 ## 发展路线（TODO）
 
@@ -352,4 +352,4 @@ bash scripts/download_musetalk_weights.sh
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=Kedreamix/Linly-Talker-Stream&type=Date)](https://star-history.com/#Kedreamix/Linly-Talker-Stream&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=Kedreamix/Linly-Talker-Stream&type=date&legend=top-left)](https://www.star-history.com/#Kedreamix/Linly-Talker-Stream&type=date&legend=top-left)
