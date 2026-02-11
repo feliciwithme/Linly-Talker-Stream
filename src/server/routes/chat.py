@@ -84,3 +84,27 @@ async def is_speaking(request):
             {"code": 0, "data": state.avatar_streams[sessionid].is_speaking()}
         ),
     )
+
+
+async def clear_history(request):
+    """清空对话历史"""
+    try:
+        params = await request.json()
+        sessionid = params.get('sessionid', 0)
+        
+        clear_session_history(sessionid)
+        
+        return web.Response(
+            content_type="application/json",
+            text=json.dumps(
+                {"code": 0, "msg": "对话历史已清空"}
+            ),
+        )
+    except Exception as e:
+        logger.exception('清空历史失败:')
+        return web.Response(
+            content_type="application/json",
+            text=json.dumps(
+                {"code": -1, "msg": str(e)}
+            ),
+        )

@@ -33,6 +33,7 @@ def create_app():
     app.router.add_post("/record", routes.record)
     app.router.add_post("/interrupt_talk", routes.interrupt_talk)
     app.router.add_post("/is_speaking", routes.is_speaking)
+    app.router.add_post("/clear_history", routes.clear_history)
     app.router.add_get("/health", routes.health_check)
     app.router.add_get("/download/{filename}", routes.download_record)
     # 前端静态资源托管

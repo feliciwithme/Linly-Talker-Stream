@@ -64,6 +64,15 @@
                 <i class="bi bi-volume-up"></i>
                 {{ t('chat.ttsMode') }}
               </button>
+              <button 
+                class="action-btn clear-history-btn"
+                @click="clearChatHistory"
+                :disabled="!isConnected"
+                :title="isConnected ? '清空对话历史' : '请先连接'"
+              >
+                <i class="bi bi-trash"></i>
+                清空历史
+              </button>
             </div>
           </div>
 
@@ -84,7 +93,7 @@
                     <span class="message-sender">{{ msg.type === 'user' ? t('chat.you') : t('chat.ai') }}</span>
                     <span class="message-time" v-if="appSettings.showTimestamp">{{ msg.time }}</span>
                   </div>
-                  <div class="message-text">{{ msg.text }}</div>
+                  <div class="message-text" v-html="renderMarkdown(msg.text)"></div>
                 </div>
               </div>
               
@@ -104,13 +113,23 @@
 
             <div class="input-area">
               <div class="input-box">
-                <textarea 
-                  v-model="chatInput"
-                  @keydown.enter.exact.prevent="sendChatMessage"
-                  :placeholder="isConnected ? t('chat.inputPlaceholder') : t('chat.inputPlaceholderDisconnected')"
-                  :disabled="!isConnected"
-                  rows="1"
-                ></textarea>
+                <div class="textarea-wrapper">
+                  <textarea 
+                    v-model="chatInput"
+                    @keydown.enter.exact.prevent="sendChatMessage"
+                    :placeholder="isConnected ? t('chat.inputPlaceholder') : t('chat.inputPlaceholderDisconnected')"
+                    :disabled="!isConnected"
+                    rows="1"
+                  ></textarea>
+                  <button 
+                    v-if="chatInput.trim()"
+                    class="clear-input-btn"
+                    @click="clearInput"
+                    title="清空输入框"
+                  >
+                    <i class="bi bi-x-circle-fill"></i>
+                  </button>
+                </div>
                 <div class="input-actions">
                   <button 
                     class="voice-btn"
@@ -119,16 +138,19 @@
                     @click="handleVoiceButtonClick"
                     @touchstart.prevent="handleVoiceButtonPress"
                     @touchend="handleVoiceButtonRelease"
-                    :class="{ recording: isRecordingVoice }"
+                    :class="{ recording: isRecordingVoice, 'continuous-mode': appSettings.voiceContinuous }"
                     :disabled="!isConnected"
                     :title="getVoiceButtonTitle"
                   >
-                    <i class="bi bi-mic-fill"></i>
-                    <span v-if="appSettings.voiceContinuous">
-                      {{ isRecordingVoice ? t('chat.voiceButtonRecordingContinuous') : t('chat.voiceButtonContinuous') }}
+                    <div class="voice-icon-wrapper">
+                      <i class="bi bi-mic-fill"></i>
+                      <span v-if="isRecordingVoice" class="recording-pulse"></span>
+                    </div>
+                    <span class="voice-btn-text" v-if="appSettings.voiceContinuous">
+                      {{ isRecordingVoice ? '点击停止' : '点击录音' }}
                     </span>
-                    <span v-else>
-                      {{ isRecordingVoice ? t('chat.voiceButtonRecording') : t('chat.voiceButton') }}
+                    <span class="voice-btn-text" v-else>
+                      {{ isRecordingVoice ? '松开发送' : '按住说话' }}
                     </span>
                   </button>
                   <button 
@@ -138,7 +160,7 @@
                     :title="!isConnected ? t('tooltips.connectDisabled') : ''"
                   >
                     <i class="bi bi-send-fill"></i>
-                    {{ t('chat.sendButton') }}
+                    <span>{{ t('chat.sendButton') }}</span>
                   </button>
                 </div>
               </div>
@@ -278,8 +300,37 @@ import SettingsPanel from './components/SettingsPanel.vue'
 import { useWebRTC } from './composables/useWebRTC'
 import { useSpeechRecognition } from './composables/useSpeechRecognition'
 import { useI18n } from './composables/useI18n'
+import { marked } from 'marked'
+import hljs from 'highlight.js'
+
+// 配置 marked
+marked.setOptions({
+  highlight: function(code, lang) {
+    if (lang && hljs.getLanguage(lang)) {
+      try {
+        return hljs.highlight(code, { language: lang }).value
+      } catch (err) {
+        console.error('代码高亮失败:', err)
+      }
+    }
+    return hljs.highlightAuto(code).value
+  },
+  breaks: true,
+  gfm: true
+})
 
 const { t, setLocale, loadLocale } = useI18n()
+
+// Markdown 渲染函数
+const renderMarkdown = (text) => {
+  if (!text) return ''
+  try {
+    return marked.parse(text)
+  } catch (error) {
+    console.error('Markdown 解析错误:', error)
+    return text
+  }
+}
 
 const sessionId = ref(0)
 const connectionStatus = ref('disconnected')
@@ -654,6 +705,11 @@ const addMessage = (text, type = 'user') => {
   })
 }
 
+// 清空输入框
+const clearInput = () => {
+  chatInput.value = ''
+}
+
 const sendChatMessage = async () => {
   if (!chatInput.value.trim()) return
   
@@ -930,6 +986,41 @@ const handleVoiceButtonClick = (e) => {
   }
 }
 
+// 清空对话历史
+const clearChatHistory = async () => {
+  if (!isConnected.value) {
+    showNotification('请先连接', 'warning')
+    return
+  }
+  
+  try {
+    const response = await fetch('/clear_history', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sessionid: sessionId.value
+      })
+    })
+    
+    if (response.ok) {
+      // 清空前端显示的消息（保留欢迎消息）
+      chatMessages.value = [
+        { 
+          type: 'ai', 
+          text: t('chat.welcomeMessage'),
+          time: getCurrentTime()
+        }
+      ]
+      showNotification('对话历史已清空', 'success')
+    } else {
+      throw new Error(`HTTP ${response.status}`)
+    }
+  } catch (error) {
+    console.error('Failed to clear history:', error)
+    showNotification('清空历史失败，请重试', 'error')
+  }
+}
+
 onMounted(async () => {
   console.log('✅ Vue 应用已挂载')
   console.log('后端 API 地址: /offer (通过 Vite proxy 转发到 localhost:8010)')
@@ -966,6 +1057,8 @@ onMounted(async () => {
 </script>
 
 <style>
+@import 'highlight.js/styles/atom-one-dark.css';
+
 * {
   margin: 0;
   padding: 0;
@@ -1201,6 +1294,16 @@ body {
   color: white;
 }
 
+.action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.clear-history-btn:hover:not(:disabled) {
+  background: var(--danger);
+  color: white;
+}
+
 /* 对话模式 */
 .chat-mode {
   flex: 1;
@@ -1288,6 +1391,133 @@ body {
   background: var(--primary);
 }
 
+/* Markdown 样式 */
+.message-text :deep(h1),
+.message-text :deep(h2),
+.message-text :deep(h3),
+.message-text :deep(h4),
+.message-text :deep(h5),
+.message-text :deep(h6) {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.message-text :deep(h1) { font-size: 1.5rem; }
+.message-text :deep(h2) { font-size: 1.3rem; }
+.message-text :deep(h3) { font-size: 1.1rem; }
+.message-text :deep(h4) { font-size: 1rem; }
+
+.message-text :deep(p) {
+  margin: 0.5rem 0;
+}
+
+.message-text :deep(p:first-child) {
+  margin-top: 0;
+}
+
+.message-text :deep(p:last-child) {
+  margin-bottom: 0;
+}
+
+.message-text :deep(ul),
+.message-text :deep(ol) {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.message-text :deep(li) {
+  margin: 0.25rem 0;
+}
+
+.message-text :deep(code) {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 0.9em;
+}
+
+.message-user .message-text :deep(code) {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.message-text :deep(pre) {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 1rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 0.5rem 0;
+}
+
+.message-user .message-text :deep(pre) {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.message-text :deep(pre code) {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  display: block;
+  line-height: 1.5;
+}
+
+.message-text :deep(blockquote) {
+  border-left: 4px solid var(--primary-light);
+  padding-left: 1rem;
+  margin: 0.5rem 0;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.message-text :deep(a) {
+  color: var(--primary-light);
+  text-decoration: none;
+}
+
+.message-text :deep(a:hover) {
+  text-decoration: underline;
+}
+
+.message-text :deep(table) {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.5rem 0;
+}
+
+.message-text :deep(table th),
+.message-text :deep(table td) {
+  border: 1px solid var(--border);
+  padding: 0.5rem;
+  text-align: left;
+}
+
+.message-text :deep(table th) {
+  background: rgba(0, 0, 0, 0.2);
+  font-weight: 600;
+}
+
+.message-text :deep(hr) {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1rem 0;
+}
+
+.message-text :deep(strong) {
+  font-weight: 700;
+}
+
+.message-text :deep(em) {
+  font-style: italic;
+}
+
+.message-text :deep(img) {
+  max-width: 100%;
+  border-radius: 8px;
+  margin: 0.5rem 0;
+}
+
 .typing-indicator {
   display: flex;
   gap: 0.25rem;
@@ -1326,30 +1556,60 @@ body {
   background: var(--bg-tertiary);
 }
 
+.textarea-wrapper {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
 .input-box textarea {
   width: 100%;
   background: var(--bg-secondary);
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 1rem;
+  padding-right: 3rem; /* 为清空按钮留空间 */
   color: var(--text-primary);
   font-size: 1rem;
   resize: none;
   min-height: 60px;
   max-height: 120px;
-  margin-bottom: 1rem;
   transition: all 0.2s;
+  font-family: inherit;
 }
 
 .input-box textarea:focus {
   outline: none;
   border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
 .input-box textarea:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   background: var(--bg-tertiary);
+}
+
+/* 清空输入框按钮 */
+.clear-input-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  font-size: 1.2rem;
+}
+
+.clear-input-btn:hover {
+  color: var(--danger);
+  transform: translateY(-50%) scale(1.1);
 }
 
 .input-actions {
@@ -1359,26 +1619,38 @@ body {
 
 .voice-btn,
 .send-btn {
-  padding: 0.75rem 1.5rem;
+  padding: 0.875rem 1.5rem;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   cursor: pointer;
   font-weight: 600;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  position: relative;
+  overflow: hidden;
 }
 
 .voice-btn {
   flex: 1;
-  background: var(--bg-secondary);
+  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
   color: var(--text-primary);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.voice-btn:hover {
-  background: var(--bg-tertiary);
+.voice-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.voice-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .voice-btn:disabled {
@@ -1389,26 +1661,104 @@ body {
 
 .voice-btn:disabled:hover {
   background: var(--bg-secondary);
+  transform: none;
 }
 
+/* 录音状态样式 */
 .voice-btn.recording {
-  background: var(--danger);
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   color: white;
-  animation: pulse 1s infinite;
+  border-color: #dc2626;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
+}
+
+.voice-btn.recording:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
+}
+
+/* 连续模式样式 */
+.voice-btn.continuous-mode:not(.recording) {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border-color: #2563eb;
+}
+
+.voice-btn.continuous-mode:not(.recording):hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+}
+
+/* 语音按钮图标容器 */
+.voice-icon-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.voice-icon-wrapper i {
+  font-size: 1.2rem;
+  z-index: 1;
+}
+
+/* 录音脉冲动画 */
+.recording-pulse {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  animation: pulse-ring 1.5s ease-out infinite;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2);
+    opacity: 0;
+  }
+}
+
+.voice-btn-text {
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
 }
 
 .send-btn {
-  background: var(--primary);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   color: white;
+  border: 2px solid transparent;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
 }
 
 .send-btn:hover:not(:disabled) {
-  background: var(--primary-dark);
+  background: linear-gradient(135deg, var(--primary-dark) 0%, #4338ca 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+}
+
+.send-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
 }
 
 .send-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.send-btn span {
+  font-size: 0.95rem;
 }
 
 /* 朗读模式 */
@@ -1432,21 +1782,25 @@ body {
 
 .tts-container textarea {
   width: 100%;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border);
+  background: var(--bg-secondary);
+  border: 2px solid var(--border);
   border-radius: 12px;
-  padding: 1rem;
+  padding: 1.25rem;
   color: var(--text-primary);
   font-size: 1rem;
   resize: vertical;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   min-height: 300px;
-  transition: all 0.2s;
+  transition: all 0.3s;
+  font-family: inherit;
+  line-height: 1.6;
 }
 
 .tts-container textarea:focus {
   outline: none;
   border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+  background: var(--bg-primary);
 }
 
 .tts-container textarea:disabled {
@@ -1457,28 +1811,41 @@ body {
 
 .tts-btn {
   width: 100%;
-  padding: 1rem;
-  background: var(--primary);
+  padding: 1.125rem 1.5rem;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  font-size: 1.05rem;
   font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  transition: all 0.2s;
+  gap: 0.625rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
 }
 
 .tts-btn:hover:not(:disabled) {
-  background: var(--primary-dark);
+  background: linear-gradient(135deg, var(--primary-dark) 0%, #4338ca 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+}
+
+.tts-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
 }
 
 .tts-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
+}
+
+.tts-btn i {
+  font-size: 1.25rem;
 }
 
 /* 右侧视频区 */
@@ -1680,6 +2047,44 @@ body {
   .content-wrapper {
     grid-template-columns: 1fr;
     grid-template-rows: 1fr 400px;
+  }
+  
+  .input-actions {
+    flex-direction: column;
+  }
+  
+  .voice-btn, .send-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .chat-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .chat-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  
+  .action-btn {
+    flex: 1;
+    min-width: 100px;
+  }
+  
+  .voice-btn-text {
+    font-size: 0.875rem;
+  }
+  
+  .send-btn span {
+    display: none;
+  }
+  
+  .send-btn i {
+    font-size: 1.25rem;
   }
 }
 
