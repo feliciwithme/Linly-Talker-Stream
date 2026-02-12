@@ -10,6 +10,7 @@ from .edge import EdgeTTS
 from .fish import FishTTS
 from .sovits import SovitsTTS
 from .cosyvoice import CosyVoiceTTS
+from .cosyvoice_api import CosyVoiceAPITTS
 from .tencent import TencentTTS
 from .doubao import DoubaoTTS
 from .indextts2 import IndexTTS2
@@ -23,6 +24,7 @@ __all__ = [
     "FishTTS",
     "SovitsTTS",
     "CosyVoiceTTS",
+    "CosyVoiceAPITTS",
     "TencentTTS",
     "DoubaoTTS",
     "IndexTTS2",

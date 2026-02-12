@@ -31,6 +31,8 @@ model:
 tts:
   type: edgetts  # edgetts | azuretts | fishtts | gpt-sovits | cosyvoice | tencent | doubao | indextts2 | xtts
   ref_file: zh-CN-YunxiaNeural
+  # type: cosyvoice_api
+  # ref_file: longanyang
 
 asr:
   mode: browser  # browser | server | auto
